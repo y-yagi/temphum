@@ -54,12 +54,6 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	html, err := ioutil.ReadFile("index.tmpl")
-	if err != nil {
-		errorResponse(err, w)
-		return
-	}
-
 	var data []Data
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -72,7 +66,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	t := TemplateArgument{Data: data}
 
-	tpl, err := template.New("html").Parse(string(html))
+	tpl, err := template.New("html").Parse(html)
 	if err != nil {
 		errorResponse(err, w)
 		return
@@ -86,3 +80,74 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func errorResponse(err error, w http.ResponseWriter) {
 	fmt.Fprintf(w, "Error occurred: %v", err)
 }
+
+const html = `
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+  </head>
+  <body>
+    <div style="width:75%;">
+      <canvas id="myChart"></canvas>
+    </div>
+  </body>
+  <script type="text/javascript">
+    (function() {
+      var labels = [];
+      var temperatures = [];
+      var humidities = [];
+
+      {{range .Data}}
+        labels.push('{{.Date}}');
+        temperatures.push('{{.Temperature}}');
+        humidities.push('{{.Humidity}}');
+      {{end}}
+      var lineChartData = {
+        labels: labels,
+        datasets: [{
+          label: 'Temperatures',
+          borderColor: 'rgb(255, 99, 132)',
+          backgroundColor: 'rgb(255, 99, 132)',
+          fill: false,
+          data: temperatures,
+          yAxisID: 'y-axis-1',
+        }, {
+          label: 'Humidities',
+          borderColor: 'rgb(54, 162, 235)',
+          backgroundColor: 'rgb(54, 162, 235)',
+          fill: false,
+          data: humidities,
+          yAxisID: 'y-axis-2'
+        }]
+      };
+
+      var ctx = document.getElementById('myChart').getContext('2d');
+      var chart = Chart.Line(ctx, {
+        data: lineChartData,
+        options: {
+          responsive: true,
+          hoverMode: 'index',
+          stacked: false,
+          scales: {
+            yAxes: [{
+              type: 'linear',
+              display: true,
+              position: 'left',
+              id: 'y-axis-1',
+            }, {
+              type: 'linear',
+              display: true,
+              position: 'right',
+              id: 'y-axis-2',
+              gridLines: {
+                drawOnChartArea: false, // only want the grid lines for one axis to show up
+              },
+            }],
+          }
+        }
+      });
+    })();
+  </script>
+</html>
+`
