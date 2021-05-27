@@ -11,6 +11,7 @@ import (
 	"text/template"
 
 	"github.com/jszwec/csvutil"
+	"github.com/pkg/browser"
 )
 
 type TemplateArgument struct {
@@ -49,7 +50,10 @@ func main() {
 	filename = flags.Args()[0]
 
 	http.HandleFunc("/", handler)
-	log.Print("Listening on http://localhost" + addr)
+
+	url := "http://localhost" + addr
+	log.Print("Listening on " + url)
+	browser.OpenURL(url)
 	http.ListenAndServe(addr, nil)
 }
 
