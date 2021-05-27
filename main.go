@@ -49,8 +49,8 @@ func main() {
 	filename = flags.Args()[0]
 
 	http.HandleFunc("/", handler)
-	log.Print("Listening on http://localhost:8888/")
-	http.ListenAndServe(":8888", nil)
+	log.Print("Listening on http://localhost" + addr)
+	http.ListenAndServe(addr, nil)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
